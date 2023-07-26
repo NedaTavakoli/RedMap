@@ -49,17 +49,34 @@ k8=/storage/hive/project/cse-aluru/ntavakoli6/hged/software/k8/k8-linux
 # Serialized the graph: 4212309 nodes, 5167904 edges
 
 /usr/bin/time -v ./vg index -x chr22_pruned.xg chr22.pruned.vg
-cd $scratch
-/usr/bin/time -v  $project_dir/./vg index -g  $scratch/chr22_pruned.gcsa chr22.pruned.vg
+
+/usr/bin/time -v  $project_dir/./vg index -g  chr22_pruned.gcsa chr22.pruned.vg
 
 
-/usr/bin/time -v ./vg map -t 24 -x chr22_pruned.xg -g chr22_pruned.gcsa -f   simulated_reads_len_${LEN}_errRate_$EROR.fastq > mapped_reads.chr22_pruned.gam
+/usr/bin/time -v ./vg map -t 24 -x chr22_pruned.xg -g chr22_pruned.gcsa -f  simulated_reads_len_${LEN}_errRate_$EROR.fastq > mapped_reads.chr22_pruned.gam
 /usr/bin/time -v ./vg view -aj mapped_reads.chr22_pruned.gam | jq '.score' > scores_mapped_reads.chr22_pruned.txt
 awk '{ sum += $1 } END { print "Overall Alignment Score:", sum; accuracy = sum /(1000*NR); print "Alignment Accuracy:", accuracy*100 "%" }' scores_mapped_reads.chr22_pruned.txt
 
-
+# Overall Alignment Score: 9466581
+# Alignment Accuracy: 94.6658%
 ./vg stats -a mapped_reads.chr22_pruned.gam 
-
+Overall Alignment Score: 9466581
+Alignment Accuracy: 94.6658%
+(base) [ntavakoli6@atl1-1-01-018-36-0 hged]$ 
+(base) [ntavakoli6@atl1-1-01-018-36-0 hged]$ 
+(base) [ntavakoli6@atl1-1-01-018-36-0 hged]$ ./vg stats -a mapped_reads.chr22_pruned.gam 
+# Total alignments: 10000
+# Total primary: 10000
+# Total secondary: 0
+# Total aligned: 9999
+# Total perfect: 0
+# Total gapless (softclips allowed): 9524
+# Total paired: 0
+# Total properly paired: 0
+# Insertions: 1769 bp in 512 read events
+# Deletions: 19 bp in 10 read events
+# Substitutions: 124291 bp in 123429 read events
+# Softclips: 4027 bp in 152 read events
 
 
 
