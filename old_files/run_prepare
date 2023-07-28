@@ -1,0 +1,106 @@
+
+
+# On hive
+ssh ntavakoli6@login-hive-slurm.pace.gatech.edu
+salloc -A hive-saluru8 -phive-himem -N1 --ntasks-per-node=1 --mem-per-cpu=1500G -t96:00:00
+
+project_dir=/storage/hive/project/cse-aluru/ntavakoli6/hged
+scratch=/storage/hive/scratch/6/ntavakoli6  
+
+cd /storage/hive/project/cse-aluru/ntavakoli6/hged
+module load gurobi
+module load anaconda3
+module load boost
+module load cmake
+
+COUNT=10000
+LEN=1000
+CHRID=chr22
+EROR=0.01
+
+samtools=/storage/hive/project/cse-aluru/ntavakoli6/hged/software/samtools-1.12/samtools
+bcftools=/storage/hive/project/cse-aluru/ntavakoli6/hged/software/bcftools-1.9/bcftools
+bgzip=/storage/hive/project/cse-aluru/ntavakoli6/hged/software/htslib-1.12/bgzip
+tabix=/storage/hive/project/cse-aluru/ntavakoli6/hged/software/htslib-1.12/tabix
+GraphAligner=/storage/hive/project/cse-aluru/ntavakoli6/hged/software/GraphAligner/bin/GraphAligner
+k8=/storage/hive/project/cse-aluru/ntavakoli6/hged/software/k8/k8-linux
+
+
+
+
+# to run main without time limit
+# To compile the project on HIVE
+ g++ -g -std=c++2a -DNDEBUG -O3 -o main_test_no_ilp_time_limit -I /storage/hive/project/cse-aluru/ntavakoli6/hged/software/gurobi910/linux64/include/ -I /storage/hive/project/cse-aluru/ntavakoli6/hged/igraph-0.10.2/include/ -I /storage/hive/project/cse-aluru/ntavakoli6/hged/igraph-0.10.2/build3/include/ -L  /storage/hive/project/cse-aluru/ntavakoli6/hged/software/gurobi910/linux64/lib/ -L  /storage/hive/project/cse-aluru/ntavakoli6/hged/igraph-0.10.2/build3/src/  src/main_no_ILP_time_limit.cpp -lgurobi_c++ -ligraph /storage/hive/project/cse-aluru/ntavakoli6/hged/software/gurobi910/linux64/lib/libgurobi91.so -lm -lz -lpthread -fopenmp
+
+
+
+rm -rf ILP_sol_vec_Chr22_all_100_10
+mkdir ILP_sol_vec_Chr22_all_100_10
+rm -rf graphs_all_100_10
+mkdir graphs_all_100_10
+## on Hive
+/usr/bin/time -v ./main_test_no_ilp_time_limit graph_chr22_all_updated.txt pos_substrings_chr22_all_100_updated.txt ./graphs_all_100_10/ ./ILP_sol_vec_Chr22_all_100_10/ 100 10 0 > out_100_10_chr22.txt
+
+
+rm -rf ILP_sol_vec_Chr22_all_100_1
+mkdir ILP_sol_vec_Chr22_all_100_1
+rm -rf graphs_all_100_1
+mkdir graphs_all_100_1
+## on Hive
+/usr/bin/time -v ./main_test_no_ilp_time_limit graph_chr22_all_updated.txt pos_substrings_chr22_all_100_updated.txt ./graphs_all_100_1/ ./ILP_sol_vec_Chr22_all_100_1/ 100 1 0 > out_100_1_chr22.txt
+
+
+
+
+rm -rf /storage/hive/scratch/6/ntavakoli6/ILP_sol_vec_Chr22_all_1000_1
+mkdir  /storage/hive/scratch/6/ntavakoli6/ILP_sol_vec_Chr22_all_1000_1
+rm -rf /storage/hive/scratch/6/ntavakoli6/graphs_all_1000_1
+mkdir  /storage/hive/scratch/6/ntavakoli6/graphs_all_1000_1
+## on Hive
+/usr/bin/time -v ./main_test_no_ilp_time_limit graph_chr22_all_updated.txt  pos_substrings_chr22_all_1000_updated.txt  /storage/hive/scratch/6/ntavakoli6/graphs_all_1000_1/  /storage/hive/scratch/6/ntavakoli6/ILP_sol_vec_Chr22_all_1000_1/ 1000 1 1 > out_1000_1_chr22_with_files.txt
+
+
+
+
+
+——————
+Steps:
+1. Get list of all variant positions using bctfools 
+$bcftools query -f '%POS\n' data/chr22.vcf.gz > all_variant_positons_chr22.txt
+
+2. Get the list of only snps and indels using bcftools
+
+  
+$bcftools query -i '(TYPE="snp" || TYPE="indel") && GT="alt"' -f '%POS\n'  data/chr22.vcf.gz > snps_indels_variant_positions_chr22.txt
+
+ 3. Get the positions that are not snps and indels (all other positions):
+
+comm -13 <(sort snps_indels_variant_positions_chr22.txt) <(sort all_variant_positions_chr22.txt) > not_snps_indels_positions_chr22.txt
+
+------------------------
+# For config 100 and 1 
+4. Get the retained variant positions from the ILP_sol_100_1
+
+# check if it zero shows retained variant positions *******
+awk 'NR==FNR {values[NR]=$1; next} values[FNR] == 0 {print $1}' ILP_sol_100_1.txt snps_indels_variant_positions_chr22.txt  > retained_variants_100_1_chr22.txt
+
+
+ # get reduced vcf file using retained variants
+
+ substeps:
+ 4.1 
+ #combine no_snps_indels_positions_chr22.txt and retained_variants_100_1_chr22.txt
+cat retained_variants_100_1_chr22.txt not_snps_indels_positions_chr22.txt | sort -n > retained_snp_indel_variants_100_1_chr22_plus_other_variants.txt
+
+
+4.2 
+I want to filter a  vcf file such that it only contains the variants in the file retained_snp_indel_variants_100_1_chr22_plus_other_variants.txt using bcftools 
+
+positions_of_interest='retained_snp_indel_variants_100_1_chr22_plus_other_variants.txt'
+$bcftools view -h data/chr22.vcf > retained_snp_indel_variants_100_1_chr22_plus_other_variants.vcf
+grep -Fwf $positions_of_interest data/chr22.vcf  >> retained_snp_indel_variants_100_1_chr22_plus_other_variants.vcf
+
+# Generate vcf.gz file and its index file vcf.gz.tbi
+cp retained_snp_indel_variants_100_1_chr22_plus_other_variants.vcf retained_snp_indel_variants_100_1_chr22_plus_other_variants_copy.vcf
+$bgzip -c retained_snp_indel_variants_100_1_chr22_plus_other_variants.vcf > retained_snp_indel_variants_100_1_chr22_plus_other_variants.vcf.gz
+$tabix -p vcf retained_snp_indel_variants_100_1_chr22_plus_other_variants.vcf.gz
