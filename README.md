@@ -38,7 +38,7 @@ We assessed the impact of reducing variants on read-to-graph mappers through two
 
 
 
-![Workflow](figures/pipeline.pdf)
+![Workflow](figures/pipeline.png)
 
 
 We utilized `vg construct` with the `-a` option to generate the variation graph, including all alternative paths. Each allele of every variant is represented by a path, which is essential for constructing the GBWT index required for indexing haplotype paths within the graph.
