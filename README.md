@@ -14,7 +14,7 @@
 
 
 ## Variant Impact Evaluation
-This repositioru is used to show to impact of variant reduction on read-to-graph mappers, here vg toolkit.
+This repositiory is used to show to impact of variant reduction on `vg` toolkit read-to-graph mapper.
 
 We conducted an evaluation to understand how the reduction of variants affects the performance and accuracy of read-to-graph mappers. In this study, we employed the `vg` toolkit as our selected read-to-graph mapper.
 
