@@ -2,7 +2,19 @@
 
 ## Reduced Map:
 
+
+## Dependencies
+- gcc (with C++20 support)
+- Boost Graph Library
+- Python (3+)
+- [samtools](https://vcftools.github.io/)
+- [bcftools](https://samtools.github.io/bcftools/)
+- [hged](https://github.com/NedaTavakoli/hged_cpp)
+- [vg](https://github.com/vgteam/vg)
+
+
 ## Variant Impact Evaluation
+This repositioru is used to show to impact of variant reduction on read-to-graph mappers, here vg toolkit.
 
 We conducted an evaluation to understand how the reduction of variants affects the performance and accuracy of read-to-graph mappers. In this study, we employed the `vg` toolkit as our selected read-to-graph mapper.
 
@@ -25,10 +37,5 @@ We assessed the impact of reducing variants on read-to-graph mappers through two
    Contrasting the first scenario, we initiated the mapping process with a reduced variation graph. The reduced variation graph was obtained by applying our algorithm to reduce the number of SNPs and Indel variants while preserving other types of variants.
 
 
-## Dependencies
-- gcc (with C++20 support)
-- Boost Graph Library
-- [samtools](https://vcftools.github.io/)
-- [bcftools](https://samtools.github.io/bcftools/)
 
 ![Workflow](figures/pipeline.png)
