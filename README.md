@@ -30,7 +30,7 @@ We assessed the impact of reducing variants on read-to-graph mappers through two
 
 1. **Scenario 1: Complete Variation Graph**
 
-   In this scenario, we mapped simulated reads onto the complete variation graph. Figure~\ref{fig:pipeline} provides an overview of the overall pipeline for this scenario. The pipeline includes graph construction, the creation of xg and gbwt indices, graph pruning, building the GCSA index, and the mapping process.
+   In this scenario, we mapped simulated reads onto the complete variation graph. Figure here provides an overview of the overall pipeline for this scenario. The pipeline includes graph construction, the creation of xg and gbwt indices, graph pruning, building the GCSA index, and the mapping process.
 
 2. **Scenario 2: Reduced Variation Graph**
 
@@ -39,3 +39,13 @@ We assessed the impact of reducing variants on read-to-graph mappers through two
 
 
 ![Workflow](figures/pipeline.png)
+
+We utilized `vg construct` with the `-a` option to generate the variation graph, including all alternative paths. Each allele of every variant is represented by a path, which is essential for constructing the GBWT index required for indexing haplotype paths within the graph.
+
+In practice, the `vg` toolkit necessitates two distinct representations of a graph for read mapping:
+- **XG**: A succinct graph representation.
+- **GCSA (Graph Compressed Sequence Alignment)**: A k-mer based index.
+
+To create these representations, we used `vg index`. Pruning the graph offers the advantage of reducing the size of the GCSA index, which proves advantageous for both storage capacity and memory usage during alignment.
+
+Finally, we applied `vg map` to map the list of simulated reads on both the complete variation graph and the reduced variation graph.
