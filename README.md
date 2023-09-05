@@ -9,4 +9,4 @@
 - [samtools](https://vcftools.github.io/)
 - [bcftools](https://samtools.github.io/bcftools/)
 
-![Workflow](figs/pipeline.png)
+![Workflow](figures/pipeline.png)
