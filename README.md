@@ -37,8 +37,10 @@ We assessed the impact of reducing variants on read-to-graph mappers through two
    Contrasting the first scenario, we initiated the mapping process with a reduced variation graph. The reduced variation graph was obtained by applying our algorithm to reduce the number of SNPs and Indel variants while preserving other types of variants.
 
 
+<div style="text-align:center">
+  ![Workflow](figures/pipeline.png)
+</div>
 
-![Workflow](figures/pipeline.png)
 
 We utilized `vg construct` with the `-a` option to generate the variation graph, including all alternative paths. Each allele of every variant is represented by a path, which is essential for constructing the GBWT index required for indexing haplotype paths within the graph.
 
